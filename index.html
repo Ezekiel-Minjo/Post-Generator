@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Business Post Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .post-canvas {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .post-canvas:hover {
+            transform: scale(1.02);
+        }
+
+        .post-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            position: relative;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .sub-text {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.4;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .color-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .template-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .template-btn {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .template-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .template-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .post-canvas {
+                width: 300px;
+                height: 300px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Instagram Business Post Generator</h1>
+        
+        <div class="controls">
+            <div class="form-group">
+                <label>Choose Template:</label>
+                <div class="template-buttons">
+                    <button class="template-btn active" data-template="modern">Modern</button>
+                    <button class="template-btn" data-template="minimal">Minimal</button>
+                    <button class="template-btn" data-template="vibrant">Vibrant</button>
+                    <button class="template-btn" data-template="elegant">Elegant</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="businessName">Business Name/Logo:</label>
+                <input type="text" id="businessName" value="Your Business" maxlength="30">
+            </div>
+
+            <div class="form-group">
+                <label for="mainText">Main Text:</label>
+                <textarea id="mainText" maxlength="100">Amazing Products & Services</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="subText">Sub Text:</label>
+                <textarea id="subText" maxlength="150">Visit us today for the best deals in town!</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Background Colors:</label>
+                <div class="color-group">
+                    <div class="color-input">
+                        <input type="color" id="color1" value="#ff6b6b">
+                        <span>Color 1</span>
+                    </div>
+                    <div class="color-input">
+                        <input type="color" id="color2" value="#4ecdc4">
+                        <span>Color 2</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="textColor">Text Color:</label>
+                <div class="color-input">
+                    <input type="color" id="textColor" value="#ffffff">
+                    <span>Text Color</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="gradientDirection">Gradient Direction:</label>
+                <select id="gradientDirection">
+                    <option value="45deg">Diagonal (45°)</option>
+                    <option value="90deg">Vertical</option>
+                    <option value="0deg">Horizontal</option>
+                    <option value="135deg">Diagonal (135°)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="preview">
+            <div class="post-canvas" id="postCanvas">
+                <div class="post-content" id="postContent">
+                    <div class="logo" id="logoText">Your Business</div>
+                    <div class="main-text" id="mainTextDisplay">Amazing Products & Services</div>
+                    <div class="sub-text" id="subTextDisplay">Visit us today for the best deals in town!</div>
+                </div>
+            </div>
+            <button class="download-btn" onclick="downloadPost()">📥 Download as PNG</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        const templates = {
+            modern: {
+                color1: '#667eea',
+                color2: '#764ba2',
+                textColor: '#ffffff',
+                direction: '135deg'
+            },
+            minimal: {
+                color1: '#f8f9fa',
+                color2: '#e9ecef',
+                textColor: '#343a40',
+                direction: '90deg'
+            },
+            vibrant: {
+                color1: '#ff6b6b',
+                color2: '#4ecdc4',
+                textColor: '#ffffff',
+                direction: '45deg'
+            },
+            elegant: {
+                color1: '#2c3e50',
+                color2: '#34495e',
+                textColor: '#ffffff',
+                direction: '0deg'
+            }
+        };
+
+        function updatePost() {
+            const businessName = document.getElementById('businessName').value || 'Your Business';
+            const mainText = document.getElementById('mainText').value || 'Amazing Products & Services';
+            const subText = document.getElementById('subText').value || 'Visit us today!';
+            const color1 = document.getElementById('color1').value;
+            const color2 = document.getElementById('color2').value;
+            const textColor = document.getElementById('textColor').value;
+            const direction = document.getElementById('gradientDirection').value;
+
+            document.getElementById('logoText').textContent = businessName;
+            document.getElementById('mainTextDisplay').textContent = mainText;
+            document.getElementById('subTextDisplay').textContent = subText;
+
+            const postContent = document.getElementById('postContent');
+            postContent.style.background = `linear-gradient(${direction}, ${color1}, ${color2})`;
+            postContent.style.color = textColor;
+        }
+
+        function applyTemplate(templateName) {
+            const template = templates[templateName];
+            document.getElementById('color1').value = template.color1;
+            document.getElementById('color2').value = template.color2;
+            document.getElementById('textColor').value = template.textColor;
+            document.getElementById('gradientDirection').value = template.direction;
+            
+            // Update active button
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.template === templateName) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            updatePost();
+        }
+
+        async function downloadPost() {
+            const canvas = document.getElementById('postCanvas');
+            const downloadBtn = document.querySelector('.download-btn');
+            
+            downloadBtn.textContent = '📸 Generating...';
+            downloadBtn.disabled = true;
+            
+            try {
+                const canvasElement = await html2canvas(canvas, {
+                    width: 400,
+                    height: 400,
+                    scale: 2,
+                    backgroundColor: null,
+                    useCORS: true,
+                    allowTaint: true
+                });
+                
+                const link = document.createElement('a');
+                link.download = 'business-post.png';
+                link.href = canvasElement.toDataURL('image/png', 1.0);
+                link.click();
+            } catch (error) {
+                console.error('Error generating image:', error);
+                alert('Error generating image. Please try again.');
+            } finally {
+                downloadBtn.textContent = '📥 Download as PNG';
+                downloadBtn.disabled = false;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('businessName').addEventListener('input', updatePost);
+        document.getElementById('mainText').addEventListener('input', updatePost);
+        document.getElementById('subText').addEventListener('input', updatePost);
+        document.getElementById('color1').addEventListener('change', updatePost);
+        document.getElementById('color2').addEventListener('change', updatePost);
+        document.getElementById('textColor').addEventListener('change', updatePost);
+        document.getElementById('gradientDirection').addEventListener('change', updatePost);
+
+        document.querySelectorAll('.template-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyTemplate(btn.dataset.template));
+        });
+
+        // Initialize
+        updatePost();
+    </script>
+</body>
+</html>
